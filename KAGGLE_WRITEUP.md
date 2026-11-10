@@ -2,13 +2,17 @@
 
 **Track:** Overall Best Paper / Best New Resource & Application  
 **Models Evaluated:** Open-Weight `Gemma-4-31B-IT` and `Gemma-4-9B-IT` (4-bit AWQ / QLoRA on Single 24 GB GPU)  
-**Keywords:** Autonomous Software Engineering, Personalized PageRank, AST Context Folding, Deterministic Verification Gates, Direct Preference Optimization, Google ADK
+**Keywords:** Autonomous Software Engineering, Personalized PageRank, AST Context Folding, Deterministic Verification Gates, Direct Preference Optimization, Google ADK  
+**Code & Submission Artifacts:** [GitHub Repository (Ritabanm/gemma-4-developer-agent-paper)](https://github.com/Ritabanm/gemma-4-developer-agent-paper)
 
 ---
 
 ## Abstract
 
-Deploying open-weight language models such as **Gemma 4 (9B and 31B)** as autonomous software engineering (SWE) agents on local consumer or single-GPU hardware (e.g., a 24 GB NVIDIA L4 or RTX 4090) exposes three fundamental bottlenecks that do not arise in massive proprietary cloud agents: **(1) context window saturation** caused by iterative full-file dumps during repository exploration, **(2) multi-turn syntax and scope regressions** where unverified intermediate edits introduce indentation errors, unbound variables, or broken function signatures that derail downstream reasoning, and **(3) unlocalized tool loops** that exhaust the episode budget before reaching test execution.
+Deploying open-weight language models such as **Gemma 4 (9B and 31B)** as autonomous software engineering (SWE) agents on local consumer or single-GPU hardware (e.g., a 24 GB NVIDIA L4 or RTX 4090) exposes three fundamental bottlenecks that do not arise in massive proprietary cloud agents:
+1. **Context window saturation** caused by iterative full-file dumps during repository exploration;
+2. **Multi-turn syntax and scope regressions** where unverified intermediate edits introduce indentation errors, unbound variables, or broken function signatures that derail downstream reasoning; and
+3. **Unlocalized tool loops** that exhaust the episode budget before reaching test execution.
 
 We introduce **TopoSWE**, a declarative multi-agent architecture and post-training framework built for Google's Agent Development Kit (`google-adk`) that resolves these bottlenecks without increasing model parameter count. First, **TopoSWE** parses target repositories into a heterogeneous Abstract Syntax Tree (AST) dependency multigraph and performs **Hybrid Seeded Personalized PageRank (PPR)**—teleporting probability mass from stack-trace frames, identifier matches, and BM25 lexical signals across call, inheritance, import, and exception edges. Second, **Token-Budgeted Subgraph Context Folding** formulates prompt assembly as a constrained submodular coverage problem, rendering top-$K$ focal functions in full while folding 1-hop structural neighbors into compact AST signatures and docstrings, compressing prompt token footprint by **74.8%**. Third, a zero-LLM-overhead **Syntax & Semantic Verification Gate (SSVG)** deterministically intercepts AST parse failures, newly introduced undefined symbols, and public signature arity regressions in $<5\text{ ms}$, while traversing reverse call/test edges to execute only impacted unit tests. Finally, **Topology-Aware Direct Preference Optimization (Topo-DPO)** aligns rank-16 QLoRA adapters on Gemma 4 using contrastive trajectory margins weighted by PPR edit locality and SSVG pass status.
 
@@ -157,5 +161,6 @@ To ensure full compatibility with the competition's declarative grading harness,
 
 ## 5. Conclusion & Reproducibility
 
-**TopoSWE** demonstrates that the primary barrier holding back local open-weight models on complex software engineering benchmarks is not raw parameter count, but **unstructured context consumption and unverified edit execution**. By replacing brute-force file reading and blind test execution with **Heterogeneous AST Graph PPR**, **Submodular Context Folding**, **Deterministic Static Verification Gates**, and **Topology-Aware DPO**, we unlock near-frontier coding agent performance on a single consumer GPU. All source code, unit tests, benchmark generators, ADK manifests, and reproduction scripts are released under the Apache-2.0 license.
+**TopoSWE** demonstrates that the primary barrier holding back local open-weight models on complex software engineering benchmarks is not raw parameter count, but **unstructured context consumption and unverified edit execution**. By replacing brute-force file reading and blind test execution with **Heterogeneous AST Graph PPR**, **Submodular Context Folding**, **Deterministic Static Verification Gates**, and **Topology-Aware DPO**, we unlock near-frontier coding agent performance on a single consumer GPU. All source code, unit tests, benchmark generators, ADK manifests, and reproduction scripts are released under the Apache-2.0 license at:
 
+👉 **[https://github.com/Ritabanm/gemma-4-developer-agent-paper](https://github.com/Ritabanm/gemma-4-developer-agent-paper)**
