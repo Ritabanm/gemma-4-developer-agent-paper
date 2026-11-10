@@ -1,7 +1,7 @@
 # TopoSWE: Topological Code-Graph Localization, AST Context Folding, and Deterministic Verification Gates for Local Gemma 4 Developer Agents
 
 **Track:** Overall Best Paper / Best New Resource & Application  
-**Models Evaluated:** Open-Weight `Gemma-4-31B-IT` and `Gemma-4-9B-IT` (4-bit AWQ / QLoRA on Single 24 GB GPU)  
+**Models Evaluated:** Open-Weight Gemma-4-31B-IT and Gemma-4-9B-IT (4-bit AWQ / QLoRA on Single 24 GB GPU)  
 **Keywords:** Autonomous Software Engineering, Personalized PageRank, AST Context Folding, Deterministic Verification Gates, Direct Preference Optimization, Google ADK  
 **Code & Submission Artifacts:** [GitHub Repository (Ritabanm/gemma-4-developer-agent-paper)](https://github.com/Ritabanm/gemma-4-developer-agent-paper)
 
@@ -14,9 +14,9 @@ Deploying open-weight language models such as **Gemma 4 (9B and 31B)** as autono
 2. **Multi-turn syntax and scope regressions** where unverified intermediate edits introduce indentation errors, unbound variables, or broken function signatures that derail downstream reasoning; and
 3. **Unlocalized tool loops** that exhaust the episode budget before reaching test execution.
 
-We introduce **TopoSWE**, a declarative multi-agent architecture and post-training framework built for Google's Agent Development Kit (`google-adk`) that resolves these bottlenecks without increasing model parameter count. First, **TopoSWE** parses target repositories into a heterogeneous Abstract Syntax Tree (AST) dependency multigraph and performs **Hybrid Seeded Personalized PageRank (PPR)**—teleporting probability mass from stack-trace frames, identifier matches, and BM25 lexical signals across call, inheritance, import, and exception edges. Second, **Token-Budgeted Subgraph Context Folding** formulates prompt assembly as a constrained submodular coverage problem, rendering top-$K$ focal functions in full while folding 1-hop structural neighbors into compact AST signatures and docstrings, compressing prompt token footprint by **74.8%**. Third, a zero-LLM-overhead **Syntax & Semantic Verification Gate (SSVG)** deterministically intercepts AST parse failures, newly introduced undefined symbols, and public signature arity regressions in $<5\text{ ms}$, while traversing reverse call/test edges to execute only impacted unit tests. Finally, **Topology-Aware Direct Preference Optimization (Topo-DPO)** aligns rank-16 QLoRA adapters on Gemma 4 using contrastive trajectory margins weighted by PPR edit locality and SSVG pass status.
+We introduce **TopoSWE**, a declarative multi-agent architecture and post-training framework built for Google's Agent Development Kit (`google-adk`) that resolves these bottlenecks without increasing model parameter count. First, **TopoSWE** parses target repositories into a heterogeneous Abstract Syntax Tree (AST) dependency multigraph and performs **Hybrid Seeded Personalized PageRank (PPR)**—teleporting probability mass from stack-trace frames, identifier matches, and BM25 lexical signals across call, inheritance, import, and exception edges. Second, **Token-Budgeted Subgraph Context Folding** formulates prompt assembly as a constrained submodular coverage problem, rendering top-K focal functions in full while folding 1-hop structural neighbors into compact AST signatures and docstrings, compressing prompt token footprint by **74.8%**. Third, a zero-LLM-overhead **Syntax & Semantic Verification Gate (SSVG)** deterministically intercepts AST parse failures, newly introduced undefined symbols, and public signature arity regressions in < 5 ms, while traversing reverse call/test edges to execute only impacted unit tests. Finally, **Topology-Aware Direct Preference Optimization (Topo-DPO)** aligns rank-16 QLoRA adapters on Gemma 4 using contrastive trajectory margins weighted by PPR edit locality and SSVG pass status.
 
-Across **SWE-bench Lite ($N=300$)**, TopoSWE elevates `Gemma-4-31B-IT` resolution from **29.0% to 48.3% (+19.3% absolute)** and `Gemma-4-9B-IT` from **18.3% to 33.7% (+15.4% absolute)**, while reducing multi-turn syntax/scope regressions by **91.5%** and cutting mean episode wall-clock latency by **66.7%**.
+Across **SWE-bench Lite (N = 300)**, TopoSWE elevates `Gemma-4-31B-IT` resolution from **29.0% to 48.3% (+19.3% absolute)** and `Gemma-4-9B-IT` from **18.3% to 33.7% (+15.4% absolute)**, while reducing multi-turn syntax/scope regressions by **91.5%** and cutting mean episode wall-clock latency by **66.7%**.
 
 ---
 
@@ -24,13 +24,13 @@ Across **SWE-bench Lite ($N=300$)**, TopoSWE elevates `Gemma-4-31B-IT` resolutio
 
 Recent advances in open-weight foundation models—specifically the **Gemma 4** family—have made it feasible to run capable code-reasoning models entirely offline on a single workstation or edge accelerator. However, directly wrapping a local 9B or 31B model inside a standard single-agent ReAct loop (`bash`, `grep`, `read_file`, `edit_file`) yields steep performance degradation on real-world multi-file repositories:
 
-1. **Quadratic KV-Cache & Attention Dilution:** Standard agents inspect 6–12 full files per issue, rapidly accumulating $>24\text{k}$ context tokens. In medium-sized dense models, long-context distraction degrades attention sharpness over exact line offsets and variable scopes.
+1. **Quadratic KV-Cache & Attention Dilution:** Standard agents inspect 6–12 full files per issue, rapidly accumulating > 24k context tokens. In medium-sized dense models, long-context distraction degrades attention sharpness over exact line offsets and variable scopes.
 2. **Lexical-Structural Mismatch:** Bug reports frequently describe *symptoms* in high-level caller modules or stack traces while the *root cause* resides 1–2 hops away in a callee helper, base class, or serializer utility that shares few lexical tokens with the issue text.
 3. **Cascading Edit Regressions:** Approximately 16%–25% of raw search/replace edits generated by uncalibrated 9B–31B models contain subtle indentation shifts, unimported helper references, or signature mismatches. Running a full container test suite (`pytest`) to discover a trivial syntax error wastes 15–45 seconds per turn and pollutes the agent's context history with verbose tracebacks.
 
 ### Summary of Contributions
 * **Heterogeneous AST Code-Graph & Seeded PPR Localizer (`TopoLocalizer`):** A deterministic graph construction and random-walk ranking engine that improves function-level Top-3 fault localization recall from **51.0% (BM25) to 84.0%** without requiring an external embedding model.
-* **Submodular AST Context Folding:** A token-budgeted context packer ($B = 2{,}400$ tokens) that combines full focal implementations with AST-folded 1-hop neighbor signatures, eliminating context window saturation.
+* **Submodular AST Context Folding:** A token-budgeted context packer (B = 2,400 tokens) that combines full focal implementations with AST-folded 1-hop neighbor signatures, eliminating context window saturation.
 * **Deterministic Syntax & Semantic Verification Gate (`SSVG`):** A pre-execution static verifier and reverse-dependency test selector that catches **91.5%** of syntax, scope, and arity regressions instantaneously.
 * **Declarative ADK Multi-Agent Isolation & Topo-DPO Adapters:** A complete `google-adk` workflow separating localization, synthesis, and verification across isolated subagent contexts, paired with Topology-Aware DPO rank-16 LoRA adapters.
 
@@ -71,65 +71,65 @@ Recent advances in open-weight foundation models—specifically the **Gemma 4** 
 
 ### 2.1 Heterogeneous Repository Code Multigraph
 
-Given a repository snapshot $\mathcal{R}$, TopoSWE parses all Python modules via the native `ast` module into a directed heterogeneous multigraph $\mathcal{G} = (\mathcal{V}, \mathcal{E}, \tau_{\mathcal{V}}, \tau_{\mathcal{E}})$. Each vertex $v \in \mathcal{V}$ corresponds to an addressable code entity with node type $\tau_{\mathcal{V}}(v) \in \{\texttt{module}, \texttt{class}, \texttt{function}, \texttt{method}\}$, storing its line span, type-annotated signature, docstring, raw source, and an **AST-folded skeleton** (where method bodies are replaced by `...` while preserving signatures and single-line docstrings).
+Given a repository snapshot R, TopoSWE parses all Python modules via the native `ast` module into a directed heterogeneous multigraph G = (V, E, tau_V, tau_E). Each vertex v in V corresponds to an addressable code entity with node type in {module, class, function, method}, storing its line span, type-annotated signature, docstring, raw source, and an **AST-folded skeleton** (where method bodies are replaced by `...` while preserving signatures and single-line docstrings).
 
-Directed edges $e = (u, v, r) \in \mathcal{E}$ capture six structural relationships $r \in \tau_{\mathcal{E}}$ with calibrated propagation weights $w(r)$:
-* `CALLS` ($w = 1.00$): Function/method $u$ invokes symbol $v$ (with reverse coupling $0.60w$ to allow fault propagation from callees to callers and vice versa).
-* `INHERITS` ($w = 0.85$): Class $u$ subclasses base class $v$.
-* `TESTS` ($w = 0.80$): Test function $u$ invokes production entity $v$.
-* `RAISES` ($w = 0.75$): Entity $u$ raises or catches custom exception $v$.
-* `IMPORTS` ($w = 0.65$): Module/entity $u$ imports symbol $v$.
-* `CONTAINS` ($w = 0.45$): Structural containment between modules, classes, and methods.
+Directed edges e = (u, v, r) capture six structural relationships with calibrated propagation weights w(r):
+* `CALLS` (w = 1.00): Function/method u invokes symbol v (with reverse coupling 0.60w to allow fault propagation from callees to callers and vice versa).
+* `INHERITS` (w = 0.85): Class u subclasses base class v.
+* `TESTS` (w = 0.80): Test function u invokes production entity v.
+* `RAISES` (w = 0.75): Entity u raises or catches custom exception v.
+* `IMPORTS` (w = 0.65): Module/entity u imports symbol v.
+* `CONTAINS` (w = 0.45): Structural containment between modules, classes, and methods.
 
 ### 2.2 Hybrid Seeded Personalized PageRank (PPR)
 
-To localize faults that cross module boundaries, we construct a multi-signal teleportation distribution $\mathbf{s} \in \Delta^{|\mathcal{V}|-1}$ over vertices by fusing three normalized signals:
+To localize faults that cross module boundaries, we construct a multi-signal teleportation distribution s in Delta over vertices by fusing three normalized signals:
 
 $$s_v \propto \lambda_{\text{bm25}} \tilde{\phi}_{\text{BM25}}(v, q) + \lambda_{\text{sym}} \tilde{\phi}_{\text{sym}}(v, q) + \lambda_{\text{trace}} \tilde{\phi}_{\text{trace}}(v, q)$$
 
-where $(\lambda_{\text{bm25}}, \lambda_{\text{sym}}, \lambda_{\text{trace}}) = (0.45, 0.30, 0.25)$. Here, $\tilde{\phi}_{\text{BM25}}$ scores sub-tokenized `CamelCase` and `snake_case` identifiers against the issue description $q$; $\tilde{\phi}_{\text{sym}}$ rewards exact identifier and file-path mentions; and $\tilde{\phi}_{\text{trace}}$ extracts `(file, line, func)` triples from stack traces in $q$.
+where (lambda_bm25, lambda_sym, lambda_trace) = (0.45, 0.30, 0.25). Here, phi_BM25 scores sub-tokenized CamelCase and snake_case identifiers against the issue description q; phi_sym rewards exact identifier and file-path mentions; and phi_trace extracts (file, line, func) triples from stack traces in q.
 
-We then compute the stationary distribution $\boldsymbol{\pi} \in \Delta^{|\mathcal{V}|-1}$ via power iteration with damping factor $\alpha = 0.25$:
+We compute the stationary distribution pi via power iteration with damping factor alpha = 0.25:
 
 $$\boldsymbol{\pi}^{(t+1)} = \alpha \mathbf{s} + (1 - \alpha) \left(\mathbf{P}^{\top} \boldsymbol{\pi}^{(t)} + \mathbf{s} \sum_{u \in \mathcal{D}} \pi_u^{(t)}\right), \quad P_{uv} = \frac{\sum_{e=(u,v,r)} w(r)}{\sum_{v', r'} w(r')}$$
 
-where $\mathcal{D}$ denotes dangling vertices with zero out-degree. Power iteration converges to $\|\boldsymbol{\pi}^{(t+1)} - \boldsymbol{\pi}^{(t)}\|_1 < 10^{-7}$ in fewer than 35 iterations ($<18\text{ ms}$ on CPU for repositories with $2{,}500$ entities).
+where D denotes dangling vertices with zero out-degree. Power iteration converges to ||pi^(t+1) - pi^(t)||_1 < 1e-7 in fewer than 35 iterations (< 18 ms on CPU for repositories with 2,500 entities).
 
 ### 2.3 Token-Budgeted Subgraph Context Folding
 
-Passing full files containing top-ranked entities still wastes thousands of tokens on unrelated methods. Given a strict subagent context budget $B$ (set to $B = 2{,}400$ tokens), we partition selected entities into a **focal set** $\mathcal{F}$ (rendered with full source code, cost $c_{\text{full}}(v)$) and a **1-hop structural neighborhood** $\mathcal{N}(\mathcal{F})$ (rendered as AST-folded skeletons, cost $c_{\text{skel}}(v) \ll c_{\text{full}}(v)$):
+Passing full files containing top-ranked entities wastes thousands of tokens on unrelated methods. Given a strict subagent context budget B (set to B = 2,400 tokens), we partition selected entities into a **focal set** F (rendered with full source code, cost c_full(v)) and a **1-hop structural neighborhood** N(F) (rendered as AST-folded skeletons, cost c_skel(v) << c_full(v)):
 
 $$\max_{\mathcal{F} \subseteq \mathcal{V}} \sum_{v \in \mathcal{F}} \pi_v + \eta \sum_{u \in \mathcal{N}(\mathcal{F}) \setminus \mathcal{F}} \pi_u \quad \text{s.t.} \quad \sum_{v \in \mathcal{F}} c_{\text{full}}(v) + \sum_{u \in \mathcal{N}(\mathcal{F}) \setminus \mathcal{F}} c_{\text{skel}}(u) \le B$$
 
-We solve this via density-ordered greedy selection over $\pi_v / c_{\text{full}}(v)^{0.25}$ up to $0.72B$ for focal nodes ($|\mathcal{F}| \le 5$), packing the remaining $0.28B$ with 1-hop callers, callees, and base classes in AST-folded form. This preserves exact type signatures and cross-file API contracts while reducing prompt length by **74.8%**.
+We solve this via density-ordered greedy selection over pi_v / c_full(v)^0.25 up to 0.72B for focal nodes (|F| <= 5), packing the remaining 0.28B with 1-hop callers, callees, and base classes in AST-folded form. This preserves exact type signatures and cross-file API contracts while reducing prompt length by **74.8%**.
 
 ### 2.4 Deterministic Syntax & Semantic Verification Gate (SSVG)
 
-Before any candidate edit is written to disk or evaluated via `pytest`, our `SyntaxSemanticGate` executes four deterministic checks in under $5\text{ ms}$:
+Before any candidate edit is written to disk or evaluated via `pytest`, our `SyntaxSemanticGate` executes four deterministic checks in under 5 ms:
 1. **Indentation-Normalizing Patch Application:** If an exact `SEARCH` block fails due to leading whitespace drift, SSVG performs line-stripped unique matching and automatically re-indents the `REPLACE` block to match the target AST block's indentation level.
 2. **AST Syntax Verification:** Parses the patched module via `ast.parse`, returning exact line/column diagnostics if syntax is invalid.
 3. **Static Scope & Unbound Symbol Analysis:** Traverses `ast.Name(ctx=ast.Load())` nodes against bound parameters, local assignments, comprehensions, imports, and Python builtins to reject newly introduced undefined variables before runtime `NameError` failures occur.
-4. **Public Callable Arity Preservation:** Compares `(min_positional, max_positional, has_varargs)` of public functions and methods before and after the edit, preventing accidental signature breakage across callers.
+4. **Public Callable Arity Preservation:** Compares (min_positional, max_positional, has_varargs) of public functions and methods before and after the edit, preventing accidental signature breakage across callers.
 
 When all static checks pass, SSVG traverses up to 3 hops along reverse `CALLS`, `TESTS`, and `IMPORTS` edges from the modified entities to execute **only the directly impacted test files** first, falling back to full suite execution only after impacted tests pass.
 
 ### 2.5 Topology-Aware Direct Preference Optimization (Topo-DPO)
 
-To specialize `Gemma-4-31B-IT` and `Gemma-4-9B-IT` for our 3-stage architecture on a single 24 GB GPU, we train rank-16 QLoRA adapters ($\alpha_{\text{LoRA}} = 32$, targeting `q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj`) using a topology-margin-weighted DPO objective. Given an issue prompt $x$, a winning trajectory $y_w$ (passes SSVG + unit tests), and a losing trajectory $y_l$ (fails SSVG or edits low-PPR distractor nodes), we define:
+To specialize `Gemma-4-31B-IT` and `Gemma-4-9B-IT` for our 3-stage architecture on a single 24 GB GPU, we train rank-16 QLoRA adapters (alpha_LoRA = 32, targeting q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj) using a topology-margin-weighted DPO objective. Given an issue prompt x, a winning trajectory y_w (passes SSVG + unit tests), and a losing trajectory y_l (fails SSVG or edits low-PPR distractor nodes), we define:
 
 $$\mathcal{L}_{\text{Topo-DPO}}(\theta) = -\mathbb{E}_{(x, y_w, y_l)} \left[ w(y_w, y_l) \log \sigma \left( \beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} + \gamma_{\text{topo}} \Delta_{\text{PPR}}(y_w, y_l) + \gamma_{\text{gate}} \mathbb{I}[\text{SSVG\_fail}(y_l)] \right) \right]$$
 
-where $\Delta_{\text{PPR}}(y_w, y_l) = \max(0, \pi(y_w) - \pi(y_l))$ measures the Personalized PageRank probability mass advantage of the ground-truth focal entities over the rejected edit location, $\beta = 0.12$, $\gamma_{\text{topo}} = 0.35$, and $\gamma_{\text{gate}} = 0.25$.
+where Delta_PPR(y_w, y_l) = max(0, pi(y_w) - pi(y_l)) measures the Personalized PageRank probability mass advantage of the ground-truth focal entities over the rejected edit location, beta = 0.12, gamma_topo = 0.35, and gamma_gate = 0.25.
 
 ---
 
 ## 3. Experimental Setup & Results
 
-### 3.1 Main Evaluation on SWE-bench Lite ($N=300$)
+### 3.1 Main Evaluation on SWE-bench Lite (N = 300)
 
-We evaluate both `Gemma-4-9B-IT` and `Gemma-4-31B-IT` served locally via vLLM (4-bit AWQ quantization) under the strict 12-hour competition evaluation constraints. Table 1 reports end-to-end resolution rate (`% Resolved`), function-level localization recall (`Func Hit@3`), mean prompt context consumed per episode (`Prompt Tokens`), multi-turn syntax/scope error rate (`Syntax/Scope Reg.`), and mean episode wall-clock duration.
+We evaluate both `Gemma-4-9B-IT` and `Gemma-4-31B-IT` served locally via vLLM (4-bit AWQ quantization) under the strict 12-hour competition evaluation constraints. The table below reports end-to-end resolution rate (% Resolved), function-level localization recall (Func Hit@3), mean prompt context consumed per episode (Prompt Tokens), multi-turn syntax/scope error rate (Syntax Reg.), and mean episode wall-clock duration.
 
-| Model & Agent Configuration | % Resolved ($\uparrow$) | Func Hit@3 ($\uparrow$) | Mean Prompt Tokens ($\downarrow$) | Syntax/Scope Reg. ($\downarrow$) | Mean Episode Time ($\downarrow$) |
+| Model & Agent Configuration | % Resolved | Func Hit@3 | Mean Prompt Tokens | Syntax Reg. | Mean Episode Time |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Gemma 4 9B** (Zero-Shot Single-Agent ReAct) | 18.3% | 44.7% | 21.4k | 24.8% | 194.0s |
 | **Gemma 4 9B + Full TopoSWE** (PPR + SSVG + Topo-DPO) | **33.7%** | **76.3%** | **5.8k** | **2.9%** | **78.5s** |
@@ -143,8 +143,8 @@ We evaluate both `Gemma-4-9B-IT` and `Gemma-4-31B-IT` served locally via vLLM (4
 
 1. **A 9B Model with TopoSWE Outperforms an Unassisted 31B Model:** Equipping `Gemma-4-9B-IT` with TopoSWE achieves **33.7%** resolution—surpassing the zero-shot `Gemma-4-31B-IT` baseline (**29.0%**) by **+4.7%**, while using **4.2x fewer prompt tokens** and running **3.4x faster**.
 2. **Hybrid Seeded PPR Bridges Cross-File Structural Hops:** On bugs where the stack trace terminates in a caller module while the fault resides in an imported helper or base class, lexical BM25 achieves only **31.2% Top-1** and **51.0% Top-3** recall. Adding edge-weighted PPR over `CALLS`, `INHERITS`, and `RAISES` edges lifts Top-1 recall to **58.4%** and Top-3 recall to **84.0%**.
-3. **AST Context Folding Prevents Attention Dilution:** As shown in our token budget sweep ($B \in [1.0\text{k}, 16.0\text{k}]$), resolution peaks at $B^* = 2.4\text{k}$ tokens (**48.3%**) and degrades when $B > 8.0\text{k}$ (**45.1%**) due to irrelevant code diluting attention over the focal bug lines.
-4. **SSVG Eliminates Costly Pytest Turn Waste:** Across our 12-repository micro-benchmark and SWE-bench Lite episodes, SSVG intercepts **100% of syntax and unbound-identifier regressions** in $<5\text{ ms}$, reducing overall multi-turn syntax/scope failure rates on `Gemma-4-31B-IT` from **16.4% to 1.4%**.
+3. **AST Context Folding Prevents Attention Dilution:** In our token budget sweep (B in [1.0k, 16.0k]), resolution peaks at B* = 2.4k tokens (**48.3%**) and degrades when B > 8.0k (**45.1%**) due to irrelevant code diluting attention over the focal bug lines.
+4. **SSVG Eliminates Costly Pytest Turn Waste:** Across our 12-repository micro-benchmark and SWE-bench Lite episodes, SSVG intercepts **100% of syntax and unbound-identifier regressions** in < 5 ms, reducing overall multi-turn syntax/scope failure rates on `Gemma-4-31B-IT` from **16.4% to 1.4%**.
 
 ---
 
@@ -161,6 +161,8 @@ To ensure full compatibility with the competition's declarative grading harness,
 
 ## 5. Conclusion & Reproducibility
 
-**TopoSWE** demonstrates that the primary barrier holding back local open-weight models on complex software engineering benchmarks is not raw parameter count, but **unstructured context consumption and unverified edit execution**. By replacing brute-force file reading and blind test execution with **Heterogeneous AST Graph PPR**, **Submodular Context Folding**, **Deterministic Static Verification Gates**, and **Topology-Aware DPO**, we unlock near-frontier coding agent performance on a single consumer GPU. All source code, unit tests, benchmark generators, ADK manifests, and reproduction scripts are released under the Apache-2.0 license at:
+**TopoSWE** demonstrates that the primary barrier holding back local open-weight models on complex software engineering benchmarks is not raw parameter count, but **unstructured context consumption and unverified edit execution**. By replacing brute-force file reading and blind test execution with **Heterogeneous AST Graph PPR**, **Submodular Context Folding**, **Deterministic Static Verification Gates**, and **Topology-Aware DPO**, we unlock near-frontier coding agent performance on a single consumer GPU.
+
+All source code, unit tests, benchmark generators, ADK manifests, and reproduction scripts are released under the Apache-2.0 license at:
 
 👉 **[https://github.com/Ritabanm/gemma-4-developer-agent-paper](https://github.com/Ritabanm/gemma-4-developer-agent-paper)**
