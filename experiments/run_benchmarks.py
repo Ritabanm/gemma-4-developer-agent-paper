@@ -13,6 +13,7 @@ from typing import Any, Dict, List
 
 try:
     import matplotlib
+
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 except ImportError:
@@ -284,7 +285,9 @@ def run_all_experiments(output_dir: str, figures_dir: str) -> Dict[str, Any]:
             # 1. BM25-only ranking
             bm25 = compute_bm25_scores(graph, t["issue_text"])
             non_mod = [
-                eid for eid in graph.entity_ids() if graph.entities[eid].kind != "module"
+                eid
+                for eid in graph.entity_ids()
+                if graph.entities[eid].kind != "module"
             ]
             bm25_sorted = sorted(non_mod, key=lambda e: bm25.get(e, 0.0), reverse=True)
             bm25_rank = (
@@ -295,7 +298,9 @@ def run_all_experiments(output_dir: str, figures_dir: str) -> Dict[str, Any]:
             bm25_ranks.append(bm25_rank)
 
             # 2. TopoSWE Hybrid Seeded PPR ranking
-            localizer = TopoLocalizer(alpha=0.25, token_budget=600, max_focal_entities=3)
+            localizer = TopoLocalizer(
+                alpha=0.25, token_budget=600, max_focal_entities=3
+            )
             ctx_slice = localizer.localize(graph, t["issue_text"])
             ppr_rank = (
                 ctx_slice.ranked_entity_ids.index(focal_eid) + 1
@@ -309,10 +314,15 @@ def run_all_experiments(output_dir: str, figures_dir: str) -> Dict[str, Any]:
 
             # 3. Multi-turn Orchestrator with Simulated First-Turn Syntax/Undefined Symbol Regression
             orchestrator = TopoSWEOrchestrator(
-                alpha=0.25, token_budget=600, max_focal_entities=3, max_repair_attempts=3
+                alpha=0.25,
+                token_budget=600,
+                max_focal_entities=3,
+                max_repair_attempts=3,
             )
 
-            def policy_fn(state: SubagentHandoffState, attempt: int) -> SearchReplaceBlock:
+            def policy_fn(
+                state: SubagentHandoffState, attempt: int
+            ) -> SearchReplaceBlock:
                 if attempt == 1:
                     # Simulate typical 9B/31B uncalibrated edit introducing an undefined helper symbol
                     return SearchReplaceBlock(
@@ -383,7 +393,9 @@ def run_all_experiments(output_dir: str, figures_dir: str) -> Dict[str, Any]:
             "toposwe_ppr_top1": round(ppr_top1 * 100, 2),
             "toposwe_ppr_top3": round(ppr_top3 * 100, 2),
             "toposwe_ppr_mrr": round(ppr_mrr, 4),
-            "mean_compression_ratio_pct": round(float(np.mean(compression_ratios)) * 100, 2),
+            "mean_compression_ratio_pct": round(
+                float(np.mean(compression_ratios)) * 100, 2
+            ),
             "mean_slice_tokens": round(float(np.mean(focal_token_counts)), 1),
             "mean_raw_tokens": round(float(np.mean(raw_token_counts)), 1),
             "ssvg_regression_interception_rate_pct": round(
@@ -456,7 +468,9 @@ def run_all_experiments(output_dir: str, figures_dir: str) -> Dict[str, Any]:
         "topo_dpo_offline_metrics": dpo_metrics,
     }
 
-    with open(os.path.join(output_dir, "benchmark_results.json"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(output_dir, "benchmark_results.json"), "w", encoding="utf-8"
+    ) as f:
         json.dump(results_summary, f, indent=2)
 
     generate_publication_figures(results_summary, figures_dir)
@@ -492,9 +506,19 @@ def generate_publication_figures(results: Dict[str, Any], figures_dir: str) -> N
     syntax_err = [c["syntax_reg_rate_pct"] for c in configs]
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 4.6))
-    colors = ["#94a3b8", "#0ea5e9", "#64748b", "#38bdf8", "#2563eb", "#4f46e5", "#10b981"]
+    colors = [
+        "#94a3b8",
+        "#0ea5e9",
+        "#64748b",
+        "#38bdf8",
+        "#2563eb",
+        "#4f46e5",
+        "#10b981",
+    ]
     x = np.arange(len(labels))
-    bars = ax1.bar(x, resolved, color=colors, width=0.62, edgecolor="#1e293b", linewidth=0.8)
+    bars = ax1.bar(
+        x, resolved, color=colors, width=0.62, edgecolor="#1e293b", linewidth=0.8
+    )
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels, rotation=22, ha="right", fontsize=8.5)
     ax1.set_ylabel("Resolution Rate (% Resolved)")
@@ -557,9 +581,32 @@ def generate_publication_figures(results: Dict[str, Any], figures_dir: str) -> N
     dense_ret_curve = [38.6, 52.1, 60.3, 69.5, 79.2]
     toposwe_ppr_curve = [58.4, 73.6, 84.0, 90.3, 95.7]
 
-    ax1.plot(ks, toposwe_ppr_curve, marker="o", linewidth=2.4, color="#10b981", label="TopoSWE (Hybrid Seeded PPR)")
-    ax1.plot(ks, dense_ret_curve, marker="s", linewidth=2.0, linestyle="--", color="#3b82f6", label="Dense Code Embedding")
-    ax1.plot(ks, bm25_curve, marker="^", linewidth=2.0, linestyle=":", color="#64748b", label="Lexical BM25 Baseline")
+    ax1.plot(
+        ks,
+        toposwe_ppr_curve,
+        marker="o",
+        linewidth=2.4,
+        color="#10b981",
+        label="TopoSWE (Hybrid Seeded PPR)",
+    )
+    ax1.plot(
+        ks,
+        dense_ret_curve,
+        marker="s",
+        linewidth=2.0,
+        linestyle="--",
+        color="#3b82f6",
+        label="Dense Code Embedding",
+    )
+    ax1.plot(
+        ks,
+        bm25_curve,
+        marker="^",
+        linewidth=2.0,
+        linestyle=":",
+        color="#64748b",
+        label="Lexical BM25 Baseline",
+    )
     ax1.set_xlabel("Top-K Ranked Functions / Methods")
     ax1.set_ylabel("Ground-Truth Fault Localization Recall (%)")
     ax1.set_title("(a) Function-Level Fault Localization Recall@K")
@@ -588,7 +635,13 @@ def generate_publication_figures(results: Dict[str, Any], figures_dir: str) -> N
         color="#f97316",
         label="Raw Full-File Concatenation",
     )
-    ax2.axvline(2.4, color="#10b981", linestyle=":", linewidth=1.6, label="Optimal Budget B* = 2.4k tokens")
+    ax2.axvline(
+        2.4,
+        color="#10b981",
+        linestyle=":",
+        linewidth=1.6,
+        label="Optimal Budget B* = 2.4k tokens",
+    )
     ax2.set_xlabel("Per-Subagent Context Budget B (k Tokens)")
     ax2.set_ylabel("Gemma 4 31B Resolution Rate (%)")
     ax2.set_title("(b) Resolution Rate vs. Subagent Context Budget B")
