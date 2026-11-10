@@ -26,3 +26,4 @@ htmlcov/
 venv/
 ENV/
 .DS_Store
+
