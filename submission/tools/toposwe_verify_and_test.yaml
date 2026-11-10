@@ -1,0 +1,19 @@
+name: "toposwe_verify_and_test"
+description: "Deterministically validates AST syntax, checks for undefined symbol introductions, and runs impacted unit tests."
+parameters:
+  type: "object"
+  properties:
+    file_path:
+      type: "string"
+      description: "Target relative file path."
+    search_block:
+      type: "string"
+      description: "Original code block to locate and replace."
+    replace_block:
+      type: "string"
+      description: "Updated replacement code block."
+  required:
+    - "file_path"
+    - "search_block"
+    - "replace_block"
+

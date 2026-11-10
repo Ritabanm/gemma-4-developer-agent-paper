@@ -1,0 +1,7 @@
+name: "topo_localizer_agent"
+type: "LlmAgent"
+description: "Parses Python repository into an AST dependency graph, computes Seeded Personalized PageRank, and packs an AST-folded context slice."
+system_prompt_path: "../prompts/localizer_prompt.md"
+tools:
+  - "toposwe_localize_subgraph"
+

@@ -1,0 +1,6 @@
+name: "verification_gate_agent"
+type: "DeterministicAgent"
+description: "Applies indentation normalization, static AST syntax validation, scope checking, and runs impacted unit tests."
+tools:
+  - "toposwe_verify_and_test"
+

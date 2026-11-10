@@ -1,0 +1,19 @@
+name: "toposwe_localize_subgraph"
+description: "Constructs the repository AST dependency multigraph, computes Seeded Personalized PageRank, and packs a token-budgeted context slice."
+parameters:
+  type: "object"
+  properties:
+    repo_root:
+      type: "string"
+      description: "Root path of the repository sandbox."
+    issue_text:
+      type: "string"
+      description: "Bug report, issue text, or stack trace."
+    token_budget:
+      type: "integer"
+      default: 2400
+      description: "Maximum tokens allocated for focal code and neighbor skeletons."
+  required:
+    - "repo_root"
+    - "issue_text"
+

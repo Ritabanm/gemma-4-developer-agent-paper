@@ -1,0 +1,22 @@
+schema_version: "1.0"
+name: "toposwe-gemma4-developer-agent"
+version: "0.1.0"
+description: "TopoSWE: Topological Code-Graph Localization, AST Context Folding, and Deterministic Verification Gates for Gemma 4 Developer Agents"
+model:
+  base_model: "google/gemma-4-31b-it"
+  adapter_path: "adapters/toposwe_dpo_lora_r16"
+  temperature: 0.1
+  max_output_tokens: 1024
+
+root_agent:
+  type: "SequentialAgent"
+  name: "toposwe_coordinator"
+  subagents:
+    - ref: "subagents/localizer_agent.yaml"
+    - type: "LoopAgent"
+      name: "synthesis_verification_loop"
+      max_iterations: 3
+      subagents:
+        - ref: "subagents/synthesizer_agent.yaml"
+        - ref: "subagents/verifier_agent.yaml"
+

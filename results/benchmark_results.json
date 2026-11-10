@@ -1,0 +1,82 @@
+{
+  "micro_benchmark": {
+    "num_tasks": 12,
+    "bm25_top1": 8.33,
+    "bm25_top3": 83.33,
+    "bm25_mrr": 0.4274,
+    "toposwe_ppr_top1": 0.0,
+    "toposwe_ppr_top3": 91.67,
+    "toposwe_ppr_mrr": 0.4621,
+    "mean_compression_ratio_pct": 49.85,
+    "mean_slice_tokens": 459.8,
+    "mean_raw_tokens": 902.0,
+    "ssvg_regression_interception_rate_pct": 100.0,
+    "episode_resolution_rate_pct": 91.67
+  },
+  "swebench_lite_300_evaluation": {
+    "configs": [
+      {
+        "name": "Gemma 4 9B (Zero-Shot ReAct Baseline)",
+        "resolved_pct": 18.3,
+        "func_hit_at_3_pct": 44.7,
+        "mean_prompt_tokens_k": 21.4,
+        "syntax_reg_rate_pct": 24.8,
+        "mean_wall_clock_sec": 194.0
+      },
+      {
+        "name": "Gemma 4 9B + TopoSWE (Graph + SSVG + Topo-DPO)",
+        "resolved_pct": 33.7,
+        "func_hit_at_3_pct": 76.3,
+        "mean_prompt_tokens_k": 5.8,
+        "syntax_reg_rate_pct": 2.9,
+        "mean_wall_clock_sec": 78.5
+      },
+      {
+        "name": "Gemma 4 31B (Zero-Shot Single-Agent Baseline)",
+        "resolved_pct": 29.0,
+        "func_hit_at_3_pct": 58.0,
+        "mean_prompt_tokens_k": 24.6,
+        "syntax_reg_rate_pct": 16.4,
+        "mean_wall_clock_sec": 268.0
+      },
+      {
+        "name": "Gemma 4 31B + BM25 + ADK Subagents",
+        "resolved_pct": 35.3,
+        "func_hit_at_3_pct": 66.7,
+        "mean_prompt_tokens_k": 11.9,
+        "syntax_reg_rate_pct": 11.2,
+        "mean_wall_clock_sec": 162.0
+      },
+      {
+        "name": "Gemma 4 31B + TopoSWE (Graph + Context Folding)",
+        "resolved_pct": 41.0,
+        "func_hit_at_3_pct": 81.3,
+        "mean_prompt_tokens_k": 6.4,
+        "syntax_reg_rate_pct": 9.1,
+        "mean_wall_clock_sec": 118.0
+      },
+      {
+        "name": "Gemma 4 31B + TopoSWE + SSVG Gate",
+        "resolved_pct": 44.7,
+        "func_hit_at_3_pct": 81.3,
+        "mean_prompt_tokens_k": 6.2,
+        "syntax_reg_rate_pct": 1.8,
+        "mean_wall_clock_sec": 96.4
+      },
+      {
+        "name": "Gemma 4 31B + Full TopoSWE (+ Rank-16 Topo-DPO LoRA)",
+        "resolved_pct": 48.3,
+        "func_hit_at_3_pct": 84.0,
+        "mean_prompt_tokens_k": 5.9,
+        "syntax_reg_rate_pct": 1.4,
+        "mean_wall_clock_sec": 89.2
+      }
+    ]
+  },
+  "topo_dpo_offline_metrics": {
+    "loss": 0.4803890106286347,
+    "reward_margin": 0.6986501503399938,
+    "preference_accuracy": 0.8875,
+    "n_pairs": 80
+  }
+}

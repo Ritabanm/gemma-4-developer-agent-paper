@@ -1,0 +1,7 @@
+name: "patch_synthesizer_agent"
+type: "LlmAgent"
+description: "Receives the budgeted AST context slice and generates minimal SEARCH/REPLACE edits targeting root-cause functions."
+system_prompt_path: "../prompts/synthesizer_prompt.md"
+tools:
+  - "toposwe_propose_patch"
+
