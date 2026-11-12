@@ -1,0 +1,14 @@
+{
+  "num_repositories": 25,
+  "bm25_top1_pct": 20.0,
+  "bm25_top3_pct": 60.0,
+  "bm25_mrr": 0.467,
+  "toposwe_ppr_top1_pct": 0.0,
+  "toposwe_ppr_top3_pct": 96.0,
+  "toposwe_ppr_mrr": 0.4783,
+  "mean_compression_pct": 3.46,
+  "mean_slice_tokens": 566.8,
+  "mean_raw_tokens": 580.4,
+  "ssvg_intercept_pct": 100.0,
+  "episode_resolution_pct": 92.0
+}
